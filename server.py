@@ -42,23 +42,27 @@ def ajouter_joueur():
 
 @app.route('/api/ajouter_argent', methods=['POST'])
 def ajouter_argent():
-    try:
-        data = request.get_json()
-        pseudo = data['pseudo']
-        montant = data['montant']
-        conn = get_db_connection()
-        joueur = conn.execute('SELECT * FROM players WHERE pseudo = ?', (pseudo,)).fetchone()
-        if joueur:
-            nouveau_solde = joueur['argent'] + montant
-            conn.execute('UPDATE players SET argent = ? WHERE pseudo = ?', (nouveau_solde, pseudo))
-            conn.commit()
-            conn.close()
-            return jsonify({"status": "success", "message": f"{montant} pièces ajoutées à {pseudo}."}), 200
-        else:
-            conn.close()
-            return jsonify({"status": "error", "message": "Joueur non trouvé!"}), 404
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+    data = request.json
+    pseudo = data.get("pseudo")
+    montant = data.get("montant")
+
+    if not pseudo or montant is None:
+        return jsonify({"error": "Champs manquants"}), 400
+
+    conn = sqlite3.connect('economie.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM economie WHERE pseudo = ?", (pseudo,))
+    row = cursor.fetchone()
+
+    if row:
+        cursor.execute("UPDATE economie SET argent = argent + ? WHERE pseudo = ?", (montant, pseudo))
+    else:
+        cursor.execute("INSERT INTO economie (pseudo, argent) VALUES (?, ?)", (pseudo, montant))
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({"message": f"{montant} pièces ajoutées à {pseudo}."})
     
 @app.route('/api/solde/<pseudo>', methods=['GET'])
 def get_solde(pseudo):
@@ -73,6 +77,20 @@ def get_solde(pseudo):
         return jsonify({"pseudo": pseudo, "solde": result['solde']})
     else:
         return jsonify({"error": "Utilisateur non trouvé"}), 404
+    
+@app.route('/api/supprimer_joueur', methods=['POST'])
+def supprimer_joueur():
+    data = request.get_json()
+    pseudo = data.get('pseudo')
+
+    # Supprimer le joueur de la base de données
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM joueurs WHERE pseudo = ?", (pseudo,))
+    conn.commit()
+    conn.close()
+
+    return jsonify({"message": f"Le joueur {pseudo} a été supprimé avec succès."})
 
 if __name__ == '__main__':  
     init_db()

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Mon Beau Site</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet"> <!-- Ajouter cette ligne pour Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <style>
         body {
             font-family: 'Poppins', sans-serif;
@@ -60,7 +60,7 @@
         }
 
         .argent i {
-            margin-right: 8px; /* Espacement avant l'icône */
+            margin-right: 8px;
         }
 
         .content {
@@ -77,6 +77,28 @@
             font-weight: bold;
             color: #ecf0f1;
         }
+
+        form {
+            margin-top: 20px;
+        }
+
+        input, button {
+            padding: 10px;
+            font-size: 16px;
+            margin: 5px;
+            border-radius: 5px;
+            border: none;
+        }
+
+        button {
+            background-color: #f39c12;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #e67e22;
+        }
     </style>
 </head>
 <body>
@@ -85,6 +107,7 @@
         <a href="#" onclick="changerPage('accueil')">Accueil</a>
         <a href="#" onclick="changerPage('apropos')">À propos de moi</a>
         <a href="#" onclick="changerPage('economie')">Économie</a>
+        <a href="#" onclick="demanderMotDePasse()">Admin</a>
     </nav>
 
     <div class="content" id="content">
@@ -119,17 +142,17 @@
             const content = document.getElementById("content");
             content.innerHTML = `<h1>Économie du Serveur</h1><div id="liste-joueurs" class="loading">Chargement...</div>`;
 
-            fetch('/api/economie')  // Appel à l'API pour récupérer les données
+            fetch('/api/economie')
                 .then(response => response.json())
                 .then(data => {
                     const liste = document.getElementById('liste-joueurs');
-                    liste.innerHTML = '';  // Effacer le texte de "Chargement..."
+                    liste.innerHTML = '';
                     data.forEach(joueur => {
                         const card = document.createElement('div');
                         card.classList.add('player-card');
                         card.innerHTML = `
-                            <h3><i class="fas fa-user"></i>${joueur.pseudo}</h3> <!-- Icône joueur -->
-                            <p class="argent"><i class="fas fa-coins"></i>${joueur.argent} pièces 💰</p> <!-- Icône de pièces -->
+                            <h3><i class="fas fa-user"></i> ${joueur.pseudo}</h3>
+                            <p class="argent"><i class="fas fa-coins"></i> ${joueur.argent} pièces 💰</p>
                         `;
                         liste.appendChild(card);
                     });
@@ -138,6 +161,72 @@
                     console.error('Erreur de chargement:', error);
                     document.getElementById('liste-joueurs').innerHTML = 'Impossible de charger les données. 😥';
                 });
+        }
+
+        function demanderMotDePasse() {
+            const motDePasse = prompt("Entrez le mot de passe admin :");
+            if (motDePasse === "admin123") {
+                afficherAdmin();
+            } else {
+                alert("⛔ Mot de passe incorrect !");
+            }
+        }
+
+        function afficherAdmin() {
+            const content = document.getElementById("content");
+            content.innerHTML = `
+                <h1>Panneau Admin</h1>
+                <p>Ajouter ou modifier l'économie d'un joueur 💼</p>
+                <form onsubmit="envoyerArgent(event)">
+                    <input type="text" id="pseudo" placeholder="Pseudo du joueur" required>
+                    <input type="number" id="montant" placeholder="Montant à ajouter" required>
+                    <button type="submit">Envoyer</button>
+                </form>
+                <form onsubmit="supprimerJoueur(event)">
+                    <input type="text" id="pseudo-supprimer" placeholder="Pseudo du joueur à supprimer" required>
+                    <button type="submit">Supprimer le joueur</button>
+                </form>
+                <div id="resultat"></div>
+            `;
+        }
+
+        function envoyerArgent(event) {
+            event.preventDefault();
+            const pseudo = document.getElementById('pseudo').value;
+            const montant = parseInt(document.getElementById('montant').value);
+
+            fetch('/api/ajouter_argent', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ pseudo, montant })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('resultat').innerText = `✅ ${data.message || "Opération réussie"}`;
+            })
+            .catch(error => {
+                console.error(error);
+                document.getElementById('resultat').innerText = '❌ Erreur lors de l\'envoi';
+            });
+        }
+
+        function supprimerJoueur(event) {
+            event.preventDefault();
+            const pseudo = document.getElementById('pseudo-supprimer').value;
+
+            fetch('/api/supprimer_joueur', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ pseudo })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('resultat').innerText = `✅ ${data.message || "Joueur supprimé avec succès"}`;
+            })
+            .catch(error => {
+                console.error(error);
+                document.getElementById('resultat').innerText = '❌ Erreur lors de la suppression';
+            });
         }
     </script>
 
