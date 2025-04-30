@@ -1,1 +1,6 @@
-flask
+Flask
+Flask-Cors
+Jinja2
+itsdangerous
+Werkzeug
+sqlite3-binary

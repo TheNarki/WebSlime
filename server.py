@@ -1,22 +1,28 @@
 from flask import Flask, jsonify, request
 import sqlite3
-from flask import Flask, render_template
+from flask import render_template
+from flask_cors import CORS
 
 app = Flask(__name__)
 
+# Appliquer CORS à l'application Flask
+CORS(app)
+
+# Connexion à la base de données
 def get_db_connection():
     conn = sqlite3.connect('game.db')
-    conn.row_factory = sqlite3.Row
+    conn.row_factory = sqlite3.Row  # Pour accéder aux colonnes par nom
     return conn
 
+# Initialisation de la base de données
 def init_db():
     conn = get_db_connection()
-    conn.execute('''
+    conn.execute(''' 
         CREATE TABLE IF NOT EXISTS players (
             id INTEGER PRIMARY KEY,
             pseudo TEXT UNIQUE,
-            argent INTEGER
-        )
+            argent INTEGER DEFAULT 0
+        );
     ''')
     conn.commit()
     conn.close()
@@ -25,6 +31,7 @@ def init_db():
 def home():
     return render_template('index.html')
 
+# Ajouter un joueur à la base de données
 @app.route('/api/ajouter_joueur', methods=['POST'])
 def ajouter_joueur():
     try:
@@ -40,6 +47,7 @@ def ajouter_joueur():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
+# Ajouter de l'argent à un joueur
 @app.route('/api/ajouter_argent', methods=['POST'])
 def ajouter_argent():
     data = request.json
@@ -49,49 +57,59 @@ def ajouter_argent():
     if not pseudo or montant is None:
         return jsonify({"error": "Champs manquants"}), 400
 
-    conn = sqlite3.connect('economie.db')
+    # Connexion à la base de données
+    conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM economie WHERE pseudo = ?", (pseudo,))
-    row = cursor.fetchone()
 
-    if row:
-        cursor.execute("UPDATE economie SET argent = argent + ? WHERE pseudo = ?", (montant, pseudo))
+    # Vérifier si le joueur existe
+    cursor.execute("SELECT argent FROM players WHERE pseudo = ?", (pseudo,))
+    joueur = cursor.fetchone()
+
+    if joueur:
+        # Ajouter de l'argent
+        cursor.execute("UPDATE players SET argent = argent + ? WHERE pseudo = ?", (montant, pseudo))
     else:
-        cursor.execute("INSERT INTO economie (pseudo, argent) VALUES (?, ?)", (pseudo, montant))
+        # Si le joueur n'existe pas, on le crée avec l'argent
+        cursor.execute("INSERT INTO players (pseudo, argent) VALUES (?, ?)", (pseudo, montant))
 
     conn.commit()
     conn.close()
 
     return jsonify({"message": f"{montant} pièces ajoutées à {pseudo}."})
-    
+
+# Récupérer le solde d'un joueur
 @app.route('/api/solde/<pseudo>', methods=['GET'])
 def get_solde(pseudo):
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT solde FROM economie WHERE pseudo = ?", (pseudo,))
+    cursor.execute("SELECT argent FROM players WHERE pseudo = ?", (pseudo,))
     result = cursor.fetchone()
     conn.close()
 
     if result:
-        return jsonify({"pseudo": pseudo, "solde": result['solde']})
+        return jsonify({"pseudo": pseudo, "solde": result['argent']})
     else:
         return jsonify({"error": "Utilisateur non trouvé"}), 404
-    
+
+# Supprimer un joueur
 @app.route('/api/supprimer_joueur', methods=['POST'])
 def supprimer_joueur():
     data = request.get_json()
     pseudo = data.get('pseudo')
 
-    # Supprimer le joueur de la base de données
-    conn = sqlite3.connect('database.db')
+    if not pseudo:
+        return jsonify({"error": "Pseudo manquant"}), 400
+
+    conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("DELETE FROM joueurs WHERE pseudo = ?", (pseudo,))
+
+    cursor.execute("DELETE FROM players WHERE pseudo = ?", (pseudo,))
     conn.commit()
     conn.close()
 
     return jsonify({"message": f"Le joueur {pseudo} a été supprimé avec succès."})
 
 if __name__ == '__main__':  
-    init_db()
-    app.run(host='0.0.0.0', port=10000)  # le port peut être ignoré par Render
+    init_db()  # Initialiser la base de données au démarrage
+    app.run(host='0.0.0.0', port=10000)  # Le port peut être ignoré par Render
