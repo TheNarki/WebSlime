@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Mon Beau Site</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet"> <!-- Ajouter cette ligne pour Font Awesome -->
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to right, #667eea, #764ba2);
+            color: white;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        nav {
+            margin-top: 20px;
+        }
+
+        nav a {
+            margin: 10px;
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        section {
+            margin-top: 50px;
+        }
+
+        .player-card {
+            background-color: #2c3e50;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 10px;
+            display: inline-block;
+            width: 250px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .player-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .player-card h3 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .player-card p {
+            font-size: 18px;
+        }
+
+        .argent {
+            font-size: 22px;
+            color: #f39c12;
+        }
+
+        .argent i {
+            margin-right: 8px; /* Espacement avant l'icône */
+        }
+
+        .content {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .content.visible {
+            opacity: 1;
+        }
+
+        .loading {
+            font-size: 18px;
+            font-weight: bold;
+            color: #ecf0f1;
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="#" onclick="changerPage('accueil')">Accueil</a>
+        <a href="#" onclick="changerPage('apropos')">À propos de moi</a>
+        <a href="#" onclick="changerPage('economie')">Économie</a>
+    </nav>
+
+    <div class="content" id="content">
+        <h1>Bienvenue !</h1>
+        <p>Ce site est magnifique 🌟</p>
+    </div>
+
+    <script>
+        function changerPage(page) {
+            const content = document.getElementById("content");
+            content.style.opacity = 0;
+
+            setTimeout(() => {
+                if (page === 'accueil') {
+                    content.innerHTML = `
+                        <h1>Bienvenue !</h1>
+                        <p>Ce site est magnifique 🌟</p>
+                    `;
+                } else if (page === 'apropos') {
+                    content.innerHTML = `
+                        <h1>À propos de moi</h1>
+                        <p>Je suis passionné de code et de projets créatifs 🚀</p>
+                    `;
+                } else if (page === 'economie') {
+                    afficherEconomie();
+                }
+                content.style.opacity = 1;
+            }, 300);
+        }
+
+        function afficherEconomie() {
+            const content = document.getElementById("content");
+            content.innerHTML = `<h1>Économie du Serveur</h1><div id="liste-joueurs" class="loading">Chargement...</div>`;
+
+            fetch('/api/economie')  // Appel à l'API pour récupérer les données
+                .then(response => response.json())
+                .then(data => {
+                    const liste = document.getElementById('liste-joueurs');
+                    liste.innerHTML = '';  // Effacer le texte de "Chargement..."
+                    data.forEach(joueur => {
+                        const card = document.createElement('div');
+                        card.classList.add('player-card');
+                        card.innerHTML = `
+                            <h3><i class="fas fa-user"></i>${joueur.pseudo}</h3> <!-- Icône joueur -->
+                            <p class="argent"><i class="fas fa-coins"></i>${joueur.argent} pièces 💰</p> <!-- Icône de pièces -->
+                        `;
+                        liste.appendChild(card);
+                    });
+                })
+                .catch(error => {
+                    console.error('Erreur de chargement:', error);
+                    document.getElementById('liste-joueurs').innerHTML = 'Impossible de charger les données. 😥';
+                });
+        }
+    </script>
+
+</body>
+</html>
