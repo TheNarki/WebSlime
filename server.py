@@ -47,6 +47,20 @@ def ajouter_joueur():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
+@app.route('/api/economie')
+def economie():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT pseudo, argent FROM players")
+    rows = cursor.fetchall()
+    conn.close()
+
+    # Si des joueurs existent dans la base de données
+    if rows:
+        players = [{"pseudo": row["pseudo"], "argent": row["argent"]} for row in rows]
+        return jsonify(players)
+    else:
+        return jsonify({"error": "Aucun joueur trouvé"}), 404
 # Ajouter de l'argent à un joueur
 @app.route('/api/ajouter_argent', methods=['POST'])
 def ajouter_argent():
