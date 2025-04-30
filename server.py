@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, request
 import sqlite3
+from flask import Flask, render_template
 
 app = Flask(__name__)
 
@@ -22,7 +23,7 @@ def init_db():
 
 @app.route('/')
 def home():
-    return "API du bot Discord en ligne !"
+    return render_template('index.html')
 
 @app.route('/api/ajouter_joueur', methods=['POST'])
 def ajouter_joueur():
@@ -73,6 +74,6 @@ def get_solde(pseudo):
     else:
         return jsonify({"error": "Utilisateur non trouvé"}), 404
 
-if __name__ == '__main__':
+if __name__ == '__main__':  
     init_db()
     app.run(host='0.0.0.0', port=10000)  # le port peut être ignoré par Render
