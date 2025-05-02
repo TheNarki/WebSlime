@@ -1,112 +1,106 @@
 from flask import Flask, jsonify, request, render_template
 from flask_cors import CORS
 from threading import Lock
-from pymongo import MongoClient
+from sqlalchemy import create_engine, text
 import os
 from dotenv import load_dotenv
 
-load_dotenv()  # Charge les variables depuis .env
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
 db_lock = Lock()
 
-# Connexion à MongoDB
-def get_db_connection():
-    client = MongoClient(os.getenv("MONGO_URI", "mongodb://localhost:27017"))
-    db = client.game_db  # Utilisation de la base de données game_db
-    return db
+# Connexion PostgreSQL via SQLAlchemy
+engine = create_engine(os.getenv("DATABASE_URL"))
 
-# Création ou mise à jour du schéma
 def init_db():
-    db = get_db_connection()
-    players = db.players
-    if "players" not in db.list_collection_names():
-        players.create_index("pseudo", unique=True)
+    with engine.connect() as conn:
+        conn.execute(text('''
+            CREATE TABLE IF NOT EXISTS players (
+                id SERIAL PRIMARY KEY,
+                pseudo TEXT UNIQUE NOT NULL,
+                argent INTEGER DEFAULT 0,
+                avatar TEXT
+            );
+        '''))
+        conn.commit()
 
 @app.route('/')
 def home():
-    db = get_db_connection()
-    players = db.players.find()
-    return render_template('index.html', joueurs=players)
+    with engine.connect() as conn:
+        result = conn.execute(text("SELECT pseudo, argent, avatar FROM players"))
+        players = result.fetchall()
+        return render_template('index.html', joueurs=players)
 
 @app.route('/api/economie')
 def economie():
-    db = get_db_connection()
-    players = db.players.find({}, {"_id": 0, "pseudo": 1, "argent": 1, "avatar": 1})
-    return jsonify([player for player in players])
+    with engine.connect() as conn:
+        result = conn.execute(text("SELECT pseudo, argent, avatar FROM players"))
+        players = [dict(row._mapping) for row in result]
+        return jsonify(players)
 
 @app.route('/api/ajouter_joueur', methods=['POST'])
 def ajouter_joueur():
     data = request.get_json()
     pseudo = data['pseudo']
-    db = get_db_connection()
-    players = db.players
-    if players.find_one({"pseudo": pseudo}):
-        return jsonify({"status": "error", "message": "Le joueur existe déjà!"}), 400
-
-    players.insert_one({"pseudo": pseudo, "argent": 0})
-    return jsonify({"status": "success", "message": f"Joueur {pseudo} ajouté avec succès!"})
+    try:
+        with engine.connect() as conn:
+            conn.execute(text("INSERT INTO players (pseudo, argent) VALUES (:pseudo, 0)"), {"pseudo": pseudo})
+            conn.commit()
+        return jsonify({"status": "success", "message": f"Joueur {pseudo} ajouté avec succès!"})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 400
 
 @app.route('/api/ajouter_argent', methods=['POST'])
 def ajouter_argent():
     data = request.json
     pseudo = data.get("pseudo")
     montant = data.get("montant")
-
     if not pseudo or montant is None:
         return jsonify({"error": "Champs manquants"}), 400
 
-    db = get_db_connection()
-    players = db.players
-    player = players.find_one({"pseudo": pseudo})
-
-    if player:
-        players.update_one({"pseudo": pseudo}, {"$inc": {"argent": montant}})
-    else:
-        players.insert_one({"pseudo": pseudo, "argent": montant})
-
+    with engine.connect() as conn:
+        result = conn.execute(text("SELECT * FROM players WHERE pseudo = :pseudo"), {"pseudo": pseudo}).fetchone()
+        if result:
+            conn.execute(text("UPDATE players SET argent = argent + :montant WHERE pseudo = :pseudo"), {"pseudo": pseudo, "montant": montant})
+        else:
+            conn.execute(text("INSERT INTO players (pseudo, argent) VALUES (:pseudo, :montant)"), {"pseudo": pseudo, "montant": montant})
+        conn.commit()
     return jsonify({"message": f"{montant} pièces ajoutées à {pseudo}."})
 
 @app.route('/api/solde/<pseudo>')
 def get_solde(pseudo):
-    db = get_db_connection()
-    players = db.players
-    player = players.find_one({"pseudo": pseudo})
-
-    if player:
-        return jsonify({"pseudo": pseudo, "solde": player['argent']})
-    else:
-        return jsonify({"error": "Utilisateur non trouvé"}), 404
+    with engine.connect() as conn:
+        player = conn.execute(text("SELECT argent FROM players WHERE pseudo = :pseudo"), {"pseudo": pseudo}).fetchone()
+        if player:
+            return jsonify({"pseudo": pseudo, "solde": player[0]})
+        else:
+            return jsonify({"error": "Utilisateur non trouvé"}), 404
 
 @app.route('/api/supprimer_joueur', methods=['POST'])
 def supprimer_joueur():
     data = request.get_json()
     pseudo = data.get('pseudo')
-
     if not pseudo:
         return jsonify({"error": "Pseudo manquant"}), 400
-
-    db = get_db_connection()
-    players = db.players
-    players.delete_one({"pseudo": pseudo})
-
+    with engine.connect() as conn:
+        conn.execute(text("DELETE FROM players WHERE pseudo = :pseudo"), {"pseudo": pseudo})
+        conn.commit()
     return jsonify({"message": f"Le joueur {pseudo} a été supprimé avec succès."})
 
 @app.route('/api/creer_compte', methods=['POST'])
 def creer_compte():
     data = request.get_json()
     pseudo = data.get('pseudo')
-
     if not pseudo:
         return jsonify({"error": "Pseudo manquant"}), 400
-
-    db = get_db_connection()
-    players = db.players
-    if players.find_one({"pseudo": pseudo}):
-        return jsonify({"message": f"Le compte pour {pseudo} existe déjà."})
-
-    players.insert_one({"pseudo": pseudo, "argent": 100})
+    with engine.connect() as conn:
+        result = conn.execute(text("SELECT 1 FROM players WHERE pseudo = :pseudo"), {"pseudo": pseudo}).fetchone()
+        if result:
+            return jsonify({"message": f"Le compte pour {pseudo} existe déjà."})
+        conn.execute(text("INSERT INTO players (pseudo, argent) VALUES (:pseudo, 100)"), {"pseudo": pseudo})
+        conn.commit()
     return jsonify({"message": f"Compte créé pour {pseudo} avec 100 pièces."})
 
 @app.route('/api/set_avatar', methods=['POST'])
@@ -114,12 +108,10 @@ def set_avatar():
     data = request.get_json()
     pseudo = data.get('pseudo').lower()
     avatar_url = data.get('avatar_url')
-
     with db_lock:
-        db = get_db_connection()
-        players = db.players
-        players.update_one({"pseudo": pseudo}, {"$set": {"avatar": avatar_url}})
-
+        with engine.connect() as conn:
+            conn.execute(text("UPDATE players SET avatar = :avatar WHERE pseudo = :pseudo"), {"avatar": avatar_url, "pseudo": pseudo})
+            conn.commit()
     return jsonify({"status": "success", "message": "Avatar mis à jour."})
 
 if __name__ == '__main__':
