@@ -99,107 +99,128 @@
         button:hover {
             background-color: #e67e22;
         }
+
+        .form-avatar {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #34495e;
+            border-radius: 8px;
+        }
+
+        .form-avatar input {
+            width: 300px;
+            margin-right: 10px;
+        }
     </style>
 </head>
 <body>
 
-    <nav>
-        <a href="#" onclick="changerPage('accueil')">Accueil</a>
-        <a href="#" onclick="changerPage('apropos')">À propos de moi</a>
-        <a href="#" onclick="changerPage('economie')">Économie</a>
-        <a href="#" onclick="demanderMotDePasse()">Admin</a>
-    </nav>
+<nav>
+    <a href="#" onclick="changerPage('accueil')">Accueil</a>
+    <a href="#" onclick="changerPage('apropos')">À propos de moi</a>
+    <a href="#" onclick="changerPage('economie')">Économie</a>
+    <a href="#" onclick="demanderMotDePasse()">Admin</a>
+</nav>
 
-    <div class="content" id="content">
-        <h1>Bienvenue !</h1>
-        <p>Ce site est magnifique 🌟</p>
-    </div>
+<div class="content" id="content">
+    <h1>Bienvenue !</h1>
+    <p>Ce site est magnifique 🌟</p>
+</div>
 
-    <script>
-        function changerPage(page) {
-            const content = document.getElementById("content");
-            content.style.opacity = 0;
+<script>
+    function changerPage(page) {
+        const content = document.getElementById("content");
+        content.style.opacity = 0;
 
-            setTimeout(() => {
-                if (page === 'accueil') {
-                    content.innerHTML = `
-                        <h1>Bienvenue !</h1>
-                        <p>Ce site est magnifique 🌟</p>
-                    `;
-                } else if (page === 'apropos') {
-                    content.innerHTML = `
-                        <h1>À propos de moi</h1>
-                        <p>Je suis passionné de code et de projets créatifs 🚀</p>
-                    `;
-                } else if (page === 'economie') {
-                    afficherEconomie();
-                }
-                content.style.opacity = 1;
-            }, 300);
-        }
-
-        function afficherEconomie() {
-            const content = document.getElementById("content");
-            content.innerHTML = `<h1>Économie du Serveur</h1><div id="liste-joueurs" class="loading">Chargement...</div>`;
-
-            fetch('/api/economie')
-                .then(response => response.json())
-                .then(data => {
-                    const liste = document.getElementById('liste-joueurs');
-                    liste.innerHTML = '';
-                    data.forEach(joueur => {
-                        const card = document.createElement('div');
-                        card.classList.add('player-card');
-                        card.innerHTML = `
-                            <h3><i class="fas fa-user"></i> ${joueur.pseudo}</h3>
-                            <p class="argent"><i class="fas fa-coins"></i> ${joueur.argent} pièces 💰</p>
-                        `;
-                        liste.appendChild(card);
-                    });
-                })
-                .catch(error => {
-                    console.error('Erreur de chargement:', error);
-                    document.getElementById('liste-joueurs').innerHTML = 'Impossible de charger les données. 😥';
-                });
-        }
-
-        function demanderMotDePasse() {
-            const motDePasse = prompt("Entrez le mot de passe admin :");
-            if (motDePasse === "a") {
-                afficherAdmin();
-            } else {
-                alert("⛔ Mot de passe incorrect !");
+        setTimeout(() => {
+            if (page === 'accueil') {
+                content.innerHTML = `
+                    <h1>Bienvenue !</h1>
+                    <p>Ce site est magnifique 🌟</p>
+                `;
+            } else if (page === 'apropos') {
+                content.innerHTML = `
+                    <h1>À propos de moi</h1>
+                    <p>Je suis passionné de code et de projets créatifs 🚀</p>
+                `;
+            } else if (page === 'economie') {
+                afficherEconomie();
             }
-        }
+            content.style.opacity = 1;
+        }, 300);
+    }
 
-        function afficherAdmin() {
-            const content = document.getElementById("content");
-            content.innerHTML = `
-                <h1>Panneau Admin</h1>
-                <p>Ajouter ou modifier l'économie d'un joueur 💼</p>
-                <form onsubmit="envoyerArgent(event)">
-                    <input type="text" id="pseudo" placeholder="Pseudo du joueur" required>
-                    <input type="number" id="montant" placeholder="Montant à ajouter" required>
-                    <button type="submit">Envoyer</button>
-                </form>
-                <form onsubmit="supprimerJoueur(event)">
-                    <input type="text" id="pseudo-supprimer" placeholder="Pseudo du joueur à supprimer" required>
-                    <button type="submit">Supprimer le joueur</button>
-                </form>
-                <div id="resultat"></div>
-            `;
-        }
+    function afficherEconomie() {
+        const content = document.getElementById("content");
+        content.innerHTML = `<h1>Économie du Serveur</h1><div id="liste-joueurs" class="loading">Chargement...</div>`;
 
-        function envoyerArgent(event) {
-            event.preventDefault();
-            const pseudo = document.getElementById('pseudo').value;
-            const montant = parseInt(document.getElementById('montant').value);
-
-            fetch('/api/ajouter_argent', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ pseudo, montant })
+        fetch('/api/economie')
+            .then(response => response.json())
+            .then(data => {
+                const liste = document.getElementById('liste-joueurs');
+                liste.innerHTML = '';
+                data.forEach(joueur => {
+                    const card = document.createElement('div');
+                    card.classList.add('player-card');
+                    card.innerHTML = `
+                        <img src="https://cdn.discordapp.com/avatars/${joueur.id}/${joueur.avatar}.png" alt="Avatar" style="width: 64px; height: 64px; border-radius: 50%; margin-bottom: 10px;">
+                        <h3><i class="fas fa-user"></i> ${joueur.pseudo.toUpperCase()}</h3>
+                        <p class="argent"><i class="fas fa-coins"></i> ${joueur.argent} pièces 💰</p>
+                    `;
+                    liste.appendChild(card);
+                });
             })
+            .catch(error => {
+                console.error('Erreur de chargement:', error);
+                document.getElementById('liste-joueurs').innerHTML = 'Impossible de charger les données. 😥';
+            });
+    }
+
+    function demanderMotDePasse() {
+        const motDePasse = prompt("Entrez le mot de passe admin :");
+        if (motDePasse === "a") {
+            afficherAdmin();
+        } else {
+            alert("⛔ Mot de passe incorrect !");
+        }
+    }
+
+    function afficherAdmin() {
+        const content = document.getElementById("content");
+        content.innerHTML = `
+            <h1>Panneau Admin</h1>
+            <p>Ajouter ou modifier l'économie d'un joueur 💼</p>
+            <form onsubmit="envoyerArgent(event)">
+                <input type="text" id="pseudo" placeholder="Pseudo du joueur" required>
+                <input type="number" id="montant" placeholder="Montant à ajouter" required>
+                <button type="submit">Envoyer</button>
+            </form>
+            <form onsubmit="supprimerJoueur(event)">
+                <input type="text" id="pseudo-supprimer" placeholder="Pseudo du joueur à supprimer" required>
+                <button type="submit">Supprimer le joueur</button>
+            </form>
+            <div id="resultat"></div>
+            <div class="form-avatar">
+                <h3>Changer l'avatar d'un joueur</h3>
+                <form onsubmit="changerAvatar(event)">
+                    <input type="text" id="pseudo-avatar" placeholder="Pseudo du joueur" required>
+                    <input type="text" id="avatar-url" placeholder="URL de l'avatar" required>
+                    <button type="submit">Mettre à jour l'avatar</button>
+                </form>
+            </div>
+        `;
+    }
+
+    function envoyerArgent(event) {
+        event.preventDefault();
+        const pseudo = document.getElementById('pseudo').value;
+        const montant = parseInt(document.getElementById('montant').value);
+
+        fetch('/api/ajouter_argent', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ pseudo, montant })
+        })
             .then(response => response.json())
             .then(data => {
                 document.getElementById('resultat').innerText = `✅ ${data.message || "Opération réussie"}`;
@@ -208,17 +229,17 @@
                 console.error(error);
                 document.getElementById('resultat').innerText = '❌ Erreur lors de l\'envoi';
             });
-        }
+    }
 
-        function supprimerJoueur(event) {
-            event.preventDefault();
-            const pseudo = document.getElementById('pseudo-supprimer').value;
+    function supprimerJoueur(event) {
+        event.preventDefault();
+        const pseudo = document.getElementById('pseudo-supprimer').value;
 
-            fetch('/api/supprimer_joueur', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ pseudo })
-            })
+        fetch('/api/supprimer_joueur', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ pseudo })
+        })
             .then(response => response.json())
             .then(data => {
                 document.getElementById('resultat').innerText = `✅ ${data.message || "Joueur supprimé avec succès"}`;
@@ -227,8 +248,28 @@
                 console.error(error);
                 document.getElementById('resultat').innerText = '❌ Erreur lors de la suppression';
             });
-        }
-    </script>
+    }
+
+    function changerAvatar(event) {
+        event.preventDefault();
+        const pseudo = document.getElementById('pseudo-avatar').value;
+        const avatarUrl = document.getElementById('avatar-url').value;
+
+        fetch('/api/set_avatar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ pseudo, avatar_url: avatarUrl })
+        })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+            })
+            .catch(error => {
+                console.error(error);
+                alert('Erreur lors de la mise à jour de l\'avatar');
+            });
+    }
+</script>
 
 </body>
 </html>
