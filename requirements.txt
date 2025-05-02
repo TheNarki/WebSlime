@@ -2,4 +2,5 @@ Flask
 Flask-Cors
 Jinja2
 itsdangerous
-
+pymongo
+python-dotenv
