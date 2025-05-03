@@ -4,15 +4,33 @@ from threading import Lock
 from sqlalchemy import create_engine, text
 import os
 from dotenv import load_dotenv
+from urllib.parse import quote_plus
+import psycopg2
 
 load_dotenv()
+
+db_user = os.getenv("DB_USER")
+db_password = quote_plus(os.getenv("DB_PASSWORD"))
+db_host = os.getenv("DB_HOST")
+db_port = os.getenv("DB_PORT")
+db_name = os.getenv("DB_NAME")
+
+DATABASE_URL = f"postgresql://{db_user}:{db_password}@{db_host}.oregon-postgres.render.com:{db_port}/{db_name}"
+
+# Connexion SQLAlchemy
+engine = create_engine(DATABASE_URL)
+
+# Connexion psycopg2 pour test
+try:
+    conn = psycopg2.connect(DATABASE_URL)
+    print("Connexion réussie à la base de données")
+    conn.close()
+except Exception as e:
+    print(f"Erreur de connexion : {e}")
 
 app = Flask(__name__)
 CORS(app)
 db_lock = Lock()
-
-# Connexion PostgreSQL via SQLAlchemy
-engine = create_engine(os.getenv("DATABASE_URL"))
 
 def init_db():
     with engine.connect() as conn:
