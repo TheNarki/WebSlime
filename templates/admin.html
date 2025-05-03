@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Panneau Admin</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: #f0f2f5;
+            padding: 2rem;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 2rem;
+            background: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #eaeaea;
+        }
+        th {
+            background: #4b6cb7;
+            color: white;
+        }
+        td img {
+            max-width: 40px;
+            border-radius: 50%;
+        }
+        .actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .actions input, .actions button {
+            padding: 0.5rem;
+            font-size: 0.9rem;
+            border: none;
+            border-radius: 4px;
+        }
+        .actions input {
+            width: 60px;
+        }
+        .btn-ajout {
+            background: #28a745;
+            color: white;
+        }
+        .btn-avatar {
+            background: #17a2b8;
+            color: white;
+        }
+        .btn-supprimer {
+            background: #dc3545;
+            color: white;
+        }
+        .btn-ajout:hover,
+        .btn-avatar:hover,
+        .btn-supprimer:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <h1>Panneau d'administration</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Pseudo</th>
+                <th>Argent</th>
+                <th>Avatar</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for joueur in joueurs %}
+            <tr>
+                <td>{{ joueur.pseudo }}</td>
+                <td>{{ joueur.argent }}</td>
+                <td>
+                    {% if joueur.avatar %}
+                        <img src="{{ joueur.avatar }}" alt="Avatar">
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td class="actions">
+                    <form method="post" action="/admin/ajouter_argent">
+                        <input type="hidden" name="pseudo" value="{{ joueur.pseudo }}">
+                        <input type="number" name="montant" placeholder="+" min="1">
+                        <button class="btn-ajout" type="submit">💰</button>
+                    </form>
+                    <form method="post" action="/admin/set_avatar">
+                        <input type="hidden" name="pseudo" value="{{ joueur.pseudo }}">
+                        <input type="url" name="avatar_url" placeholder="URL avatar">
+                        <button class="btn-avatar" type="submit">🖼️</button>
+                    </form>
+                    <form method="post" action="/admin/supprimer">
+                        <input type="hidden" name="pseudo" value="{{ joueur.pseudo }}">
+                        <button class="btn-supprimer" type="submit">🗑️</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

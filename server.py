@@ -1,11 +1,20 @@
 from flask import Flask, jsonify, request, render_template
 from flask_cors import CORS
 from threading import Lock
+
+# Define a threading lock
+db_lock = Lock()
 from sqlalchemy import create_engine, text
 import os
 from dotenv import load_dotenv
 from urllib.parse import quote_plus
 import psycopg2
+from flask import Flask, jsonify, request, render_template, redirect, url_for, session
+from flask_cors import CORS
+import os
+
+# Ajoute ce pour utiliser les sessions
+
 
 load_dotenv()
 
@@ -29,8 +38,11 @@ except Exception as e:
     print(f"Erreur de connexion : {e}")
 
 app = Flask(__name__)
+app = Flask(__name__)
 CORS(app)
-db_lock = Lock()
+
+# Ajoute ce pour utiliser les sessions
+app.secret_key = os.getenv("SECRET_KEY", "admin")
 
 def init_db():
     with engine.connect() as conn:
@@ -131,6 +143,75 @@ def set_avatar():
             conn.execute(text("UPDATE players SET avatar = :avatar WHERE pseudo = :pseudo"), {"avatar": avatar_url, "pseudo": pseudo})
             conn.commit()
     return jsonify({"status": "success", "message": "Avatar mis à jour."})
+
+@app.route('/admin')
+def admin():
+    if not session.get("logged_in"):
+        return redirect(url_for("login"))
+    with engine.connect() as conn:
+        joueurs = conn.execute(text("SELECT pseudo, argent, avatar FROM players")).fetchall()
+    return render_template("admin.html", joueurs=joueurs)
+
+@app.route('/admin/ajouter_argent', methods=["POST"])
+def admin_ajouter_argent():
+    pseudo = request.form.get("pseudo")
+    montant = int(request.form.get("montant", 0))
+    with engine.connect() as conn:
+        conn.execute(text("UPDATE players SET argent = argent + :montant WHERE pseudo = :pseudo"), {"pseudo": pseudo, "montant": montant})
+        conn.commit()
+    return redirect(url_for("admin"))
+
+@app.route('/admin/set_avatar', methods=["POST"])
+def admin_set_avatar():
+    pseudo = request.form.get("pseudo").lower()
+    avatar_url = request.form.get("avatar_url")
+    with engine.connect() as conn:
+        conn.execute(text("UPDATE players SET avatar = :avatar WHERE pseudo = :pseudo"), {"pseudo": pseudo, "avatar": avatar_url})
+        conn.commit()
+    return redirect(url_for("admin"))
+
+@app.route('/admin/supprimer', methods=["POST"])
+def admin_supprimer():
+    pseudo = request.form.get("pseudo")
+    with engine.connect() as conn:
+        conn.execute(text("DELETE FROM players WHERE pseudo = :pseudo"), {"pseudo": pseudo})
+        conn.commit()
+    return redirect(url_for("admin"))
+
+
+@app.route('/admin/update', methods=['POST'])
+def update_argent():
+    pseudo = request.form.get('pseudo')
+    argent = request.form.get('argent')
+    if not pseudo or not argent:
+        return "Champs requis manquants", 400
+
+    try:
+        argent = int(argent)
+        with engine.connect() as conn:
+            conn.execute(text("UPDATE players SET argent = :argent WHERE pseudo = :pseudo"),
+                         {"argent": argent, "pseudo": pseudo})
+            conn.commit()
+        return "Argent mis à jour avec succès. <a href='/admin'>Retour</a>"
+    except Exception as e:
+        return f"Erreur : {e}", 500
+    
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        password = request.form.get('password')
+        if password == os.getenv("ADMIN_PASSWORD"):
+            session['logged_in'] = True
+            return redirect(url_for('admin'))
+        else:
+            return "Mot de passe incorrect", 403
+    return render_template("login.html")
+
+@app.route('/logout')
+def logout():
+    session.pop('logged_in', None)
+    return redirect(url_for('login'))
+
 
 if __name__ == '__main__':
     init_db()
