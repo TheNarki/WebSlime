@@ -1,17 +1,18 @@
-from flask import Flask, jsonify, request, render_template
+from flask import Flask, jsonify, request, render_template, make_response
 from flask_cors import CORS
 from threading import Lock
 
 # Define a threading lock
 db_lock = Lock()
 from sqlalchemy import create_engine, text
-import os
 from dotenv import load_dotenv
 from urllib.parse import quote_plus
 import psycopg2
 from flask import Flask, jsonify, request, render_template, redirect, url_for, session
 from flask_cors import CORS
 import os
+import csv
+from io import StringIO
 
 # Ajoute ce pour utiliser les sessions
 
@@ -211,6 +212,24 @@ def login():
 def logout():
     session.pop('logged_in', None)
     return redirect(url_for('login'))
+
+@app.route("/export/argent")
+def export_argent():
+    with engine.connect() as conn:
+        result = conn.execute(text("SELECT pseudo, argent FROM players"))
+        joueurs = result.fetchall()
+
+    # Générer un fichier CSV en mémoire
+    si = StringIO()
+    writer = csv.writer(si)
+    writer.writerow(["Pseudo", "Argent"])
+    for joueur in joueurs:
+        writer.writerow([joueur.pseudo, joueur.argent])
+
+    output = make_response(si.getvalue())
+    output.headers["Content-Disposition"] = "attachment; filename=joueurs_argent.csv"
+    output.headers["Content-type"] = "text/csv"
+    return output
 
 
 if __name__ == '__main__':

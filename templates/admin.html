@@ -2,74 +2,61 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Panneau Admin</title>
+    <title>Gestion des Joueurs</title>
     <style>
         body {
-            margin: 0;
-            font-family: 'Segoe UI', sans-serif;
-            background: #f0f2f5;
-            padding: 2rem;
+            font-family: Arial, sans-serif;
+            margin: 2rem;
+            background-color: #f2f2f2;
+            color: #333;
         }
         h1 {
-            text-align: center;
-            color: #333;
+            color: #007bff;
         }
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 2rem;
-            background: white;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            border-radius: 8px;
-            overflow: hidden;
+            margin-top: 1rem;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
         th, td {
-            padding: 1rem;
+            padding: 0.75rem;
             text-align: left;
-            border-bottom: 1px solid #eaeaea;
+            border-bottom: 1px solid #ddd;
         }
         th {
-            background: #4b6cb7;
+            background-color: #007bff;
             color: white;
         }
-        td img {
-            max-width: 40px;
-            border-radius: 50%;
+        tr:hover {
+            background-color: #f1f1f1;
         }
-        .actions {
-            display: flex;
-            gap: 0.5rem;
+        .export-buttons {
+            margin-bottom: 1rem;
         }
-        .actions input, .actions button {
-            padding: 0.5rem;
-            font-size: 0.9rem;
-            border: none;
-            border-radius: 4px;
-        }
-        .actions input {
-            width: 60px;
-        }
-        .btn-ajout {
-            background: #28a745;
+        .export-buttons a {
+            display: inline-block;
+            margin-right: 1rem;
+            padding: 0.5rem 1rem;
+            background-color: #28a745;
             color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
         }
-        .btn-avatar {
-            background: #17a2b8;
-            color: white;
-        }
-        .btn-supprimer {
-            background: #dc3545;
-            color: white;
-        }
-        .btn-ajout:hover,
-        .btn-avatar:hover,
-        .btn-supprimer:hover {
-            opacity: 0.9;
+        .export-buttons a:hover {
+            background-color: #218838;
         }
     </style>
 </head>
 <body>
-    <h1>Panneau d'administration</h1>
+    <h1>Liste des Joueurs</h1>
+    
+    <div class="export-buttons">
+        <a href="/export/argent/json">📥 Exporter en JSON</a>
+        <a href="/export/argent/csv">📄 Exporter en CSV</a>
+    </div>
 
     <table>
         <thead>
@@ -77,7 +64,6 @@
                 <th>Pseudo</th>
                 <th>Argent</th>
                 <th>Avatar</th>
-                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -87,26 +73,10 @@
                 <td>{{ joueur.argent }}</td>
                 <td>
                     {% if joueur.avatar %}
-                        <img src="{{ joueur.avatar }}" alt="Avatar">
+                        <img src="{{ joueur.avatar }}" alt="Avatar" width="40" height="40" style="border-radius: 50%;">
                     {% else %}
-                        -
+                        Aucun
                     {% endif %}
-                </td>
-                <td class="actions">
-                    <form method="post" action="/admin/ajouter_argent">
-                        <input type="hidden" name="pseudo" value="{{ joueur.pseudo }}">
-                        <input type="number" name="montant" placeholder="+" min="1">
-                        <button class="btn-ajout" type="submit">💰</button>
-                    </form>
-                    <form method="post" action="/admin/set_avatar">
-                        <input type="hidden" name="pseudo" value="{{ joueur.pseudo }}">
-                        <input type="url" name="avatar_url" placeholder="URL avatar">
-                        <button class="btn-avatar" type="submit">🖼️</button>
-                    </form>
-                    <form method="post" action="/admin/supprimer">
-                        <input type="hidden" name="pseudo" value="{{ joueur.pseudo }}">
-                        <button class="btn-supprimer" type="submit">🗑️</button>
-                    </form>
                 </td>
             </tr>
             {% endfor %}
