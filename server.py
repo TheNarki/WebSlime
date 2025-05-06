@@ -157,12 +157,12 @@ def admin():
         return redirect(url_for('login'))
     return render_template('admin.html')
 
-@app.route('/admin/ajouter_argent', methods=["POST"])
+@app.route('/admin/add', methods=["POST"])
 def admin_ajouter_argent():
     pseudo = request.form.get("pseudo")
     montant = int(request.form.get("montant", 0))
     with engine.connect() as conn:
-        conn.execute(text("UPDATE players SET argent = argent + :montant WHERE pseudo = :pseudo"), {"pseudo": pseudo, "montant": montant})
+        conn.execute(text("UPDATE players   SET argent = argent + :montant WHERE pseudo = :pseudo"), {"pseudo": pseudo, "montant": montant})
         conn.commit()
     return redirect(url_for("admin"))
 
@@ -205,7 +205,7 @@ def update_argent():
 def login():
     if request.method == 'POST':
         password = request.form.get('password')
-        if password == "ton_mot_de_passe_secret":
+        if password == "admin":
             session['admin'] = True
             return redirect(url_for('admin'))
         else:
