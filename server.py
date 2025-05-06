@@ -1,8 +1,6 @@
-from flask import Flask, jsonify, request, render_template, make_response
+from flask import Flask, jsonify, request, render_template, make_response, session, redirect, url_for
 from flask_cors import CORS
 from threading import Lock
-
-# Define a threading lock
 db_lock = Lock()
 from sqlalchemy import create_engine, text
 from dotenv import load_dotenv
@@ -13,8 +11,9 @@ from flask_cors import CORS
 import os
 import csv
 from io import StringIO
+from flask_cors import CORS
+from werkzeug.security import check_password_hash, generate_password_hash
 
-# Ajoute ce pour utiliser les sessions
 
 
 load_dotenv()
@@ -39,7 +38,7 @@ except Exception as e:
     print(f"Erreur de connexion : {e}")
 
 app = Flask(__name__)
-app = Flask(__name__)
+app.secret_key = os.getenv("FLASK_SECRET_KEY", "votre_clé_ultra_secrète")
 CORS(app)
 
 # Ajoute ce pour utiliser les sessions
@@ -59,10 +58,12 @@ def init_db():
 
 @app.route('/')
 def home():
+    user = session.get('user')
     with engine.connect() as conn:
         result = conn.execute(text("SELECT pseudo, argent, avatar FROM players"))
         players = result.fetchall()
-        return render_template('index.html', joueurs=players)
+        return render_template('index.html', joueurs=players, user=user)
+
 
 @app.route('/api/economie')
 def economie():
@@ -204,25 +205,37 @@ def update_argent():
     
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    error = None
     if request.method == 'POST':
-        password = request.form.get('password')
-        if password == os.getenv("ADMIN_PASSWORD"):
-            session['logged_in'] = True
-            return redirect(url_for('admin'))
+        username = request.form['username']
+        password = request.form['password']
+        # ⚠️ Change ceci : c’est le compte admin codé en dur pour l’exemple
+        if username == 'admin' and password == 'monmotdepasse':
+            session['user'] = 'admin'
+            return redirect(url_for('home'))
         else:
-            return "Mot de passe incorrect", 403
-    return render_template("login.html")
+            error = 'Identifiants invalides'
+    return render_template('login.html', error=error)
+
 
 @app.route('/logout')
 def logout():
-    session.pop('logged_in', None)
+    session.pop('user', None)
     return redirect(url_for('login'))
+
 
 @app.route("/export/argent")
 def export_argent():
     with engine.connect() as conn:
         result = conn.execute(text("SELECT pseudo, argent FROM players"))
         joueurs = result.fetchall()
+
+@app.route('/api/export_json')
+def export_json():
+    with engine.connect() as conn:
+        result = conn.execute(text("SELECT pseudo, argent, avatar FROM players"))
+        players = [dict(row._mapping) for row in result]
+        return jsonify(players)
 
     # Générer un fichier CSV en mémoire
     si = StringIO()
