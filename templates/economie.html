@@ -13,11 +13,21 @@
         h1 {
             color: #4fd1c5;
         }
+        .actions {
+            margin-bottom: 1rem;
+        }
         input[type="text"] {
             padding: 0.5rem;
             width: 300px;
-            margin-bottom: 1rem;
             border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .export-json {
+            margin-left: 1rem;
+            padding: 0.5rem 1rem;
+            background-color: #4fd1c5;
+            color: white;
+            text-decoration: none;
             border-radius: 5px;
         }
         table {
@@ -34,6 +44,7 @@
         th {
             background: #4fd1c5;
             color: white;
+            cursor: pointer;
         }
         tr:hover {
             background: #f1f1f1;
@@ -53,16 +64,34 @@
                 tr.style.display = pseudo.includes(filtre) ? "" : "none";
             });
         }
+
+        function sortTable(colIndex) {
+            const table = document.querySelector("table tbody");
+            const rows = Array.from(table.rows);
+            const isNumeric = colIndex === 1;
+
+            rows.sort((a, b) => {
+                const valA = a.cells[colIndex].textContent.trim();
+                const valB = b.cells[colIndex].textContent.trim();
+                return isNumeric ? parseFloat(valB) - parseFloat(valA) : valA.localeCompare(valB);
+            });
+
+            table.innerHTML = "";
+            rows.forEach(row => table.appendChild(row));
+        }
     </script>
 </head>
 <body>
     <h1>💰 Économie des Joueurs</h1>
-    <input type="text" id="filtre" onkeyup="filtrer()" placeholder="🔎 Rechercher un pseudo...">
+    <div class="actions">
+        <input type="text" id="filtre" onkeyup="filtrer()" placeholder="🔎 Rechercher un pseudo...">
+        <a href="/export/argent/json" class="export-json">📥 Exporter en JSON</a>
+    </div>
     <table>
         <thead>
             <tr>
-                <th>Pseudo</th>
-                <th>Argent</th>
+                <th onclick="sortTable(0)">Pseudo 🔽</th>
+                <th onclick="sortTable(1)">Argent 💰</th>
                 <th>Avatar</th>
             </tr>
         </thead>

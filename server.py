@@ -194,19 +194,17 @@ def admin_supprimer():
 @app.route('/admin/update', methods=['POST'])
 def update_argent():
     pseudo = request.form.get('pseudo')
-    argent = request.form.get('argent')
-    if not pseudo or not argent:
-        return "Champs requis manquants", 400
-
+    nouvel_argent = request.form.get('argent')
     try:
-        argent = int(argent)
-        with engine.connect() as conn:
-            conn.execute(text("UPDATE players SET argent = :argent WHERE pseudo = :pseudo"),
-                         {"argent": argent, "pseudo": pseudo})
+        conn = get_db_connection()
+        with conn.cursor() as cursor:
+            cursor.execute("UPDATE players SET argent = %s WHERE pseudo = %s", (nouvel_argent, pseudo))
             conn.commit()
-        return "Argent mis à jour avec succès. <a href='/admin'>Retour</a>"
+        conn.close()
     except Exception as e:
-        return f"Erreur : {e}", 500
+        print(f"Erreur lors de la mise à jour : {e}")
+    return redirect(url_for('admin'))  # Assure-toi que ta route admin s'appelle bien 'admin'
+
     
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -238,19 +236,31 @@ def export_json():
         result = conn.execute(text("SELECT pseudo, argent, avatar FROM players"))
         players = [dict(row._mapping) for row in result]
         return jsonify(players)
+    
+@app.route('/export/argent/json')
+def export_json():
+    with engine.connect() as conn:
+        result = conn.execute(text("SELECT pseudo, argent, avatar FROM players"))
+        joueurs = [dict(row._mapping) for row in result]
+    return jsonify(joueurs)
 
-    # Générer un fichier CSV en mémoire
-    si = StringIO()
-    writer = csv.writer(si)
-    writer.writerow(["Pseudo", "Argent"])
-    for joueur in joueurs:
-        writer.writerow([joueur.pseudo, joueur.argent])
+@app.route("/export/argent/csv")
+def export_csv():
+    with engine.connect() as conn:
+        result = conn.execute(text("SELECT pseudo, argent FROM players"))
+        joueurs = result.fetchall()
 
-    output = make_response(si.getvalue())
-    output.headers["Content-Disposition"] = "attachment; filename=joueurs_argent.csv"
-    output.headers["Content-type"] = "text/csv"
-    return output
+        # Générer un fichier CSV en mémoire
+        si = StringIO()
+        writer = csv.writer(si)
+        writer.writerow(["Pseudo", "Argent"])
+        for joueur in joueurs:
+            writer.writerow([joueur.pseudo, joueur.argent])
 
+        output = make_response(si.getvalue())
+        output.headers["Content-Disposition"] = "attachment; filename=joueurs_argent.csv"
+        output.headers["Content-type"] = "text/csv"
+        return output
 
 if __name__ == '__main__':
     init_db()

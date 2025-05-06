@@ -32,31 +32,32 @@
         tr:hover {
             background-color: #f1f1f1;
         }
-        .export-buttons {
-            margin-bottom: 1rem;
+        input[type="number"] {
+            width: 100px;
+            padding: 0.4rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
         }
-        .export-buttons a {
-            display: inline-block;
-            margin-right: 1rem;
-            padding: 0.5rem 1rem;
-            background-color: #28a745;
+        button {
+            padding: 0.4rem 0.8rem;
+            background-color: #007bff;
             color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            transition: background-color 0.3s ease;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
         }
-        .export-buttons a:hover {
-            background-color: #218838;
+        button:hover {
+            background-color: #0056b3;
+        }
+        img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
         }
     </style>
 </head>
 <body>
     <h1>Liste des Joueurs</h1>
-    
-    <div class="export-buttons">
-        <a href="/export/argent/json">📥 Exporter en JSON</a>
-        <a href="/export/argent/csv">📄 Exporter en CSV</a>
-    </div>
 
     <table>
         <thead>
@@ -64,20 +65,31 @@
                 <th>Pseudo</th>
                 <th>Argent</th>
                 <th>Avatar</th>
+                <th>Action</th>
             </tr>
         </thead>
         <tbody>
             {% for joueur in joueurs %}
             <tr>
-                <td>{{ joueur.pseudo }}</td>
-                <td>{{ joueur.argent }}</td>
-                <td>
-                    {% if joueur.avatar %}
-                        <img src="{{ joueur.avatar }}" alt="Avatar" width="40" height="40" style="border-radius: 50%;">
-                    {% else %}
-                        Aucun
-                    {% endif %}
-                </td>
+                <form action="/admin/update" method="POST">
+                    <td>
+                        <input type="hidden" name="pseudo" value="{{ joueur.pseudo }}">
+                        {{ joueur.pseudo }}
+                    </td>
+                    <td>
+                        <input type="number" name="argent" value="{{ joueur.argent }}" required>
+                    </td>
+                    <td>
+                        {% if joueur.avatar %}
+                            <img src="{{ joueur.avatar }}" alt="Avatar">
+                        {% else %}
+                            Aucun
+                        {% endif %}
+                    </td>
+                    <td>
+                        <button type="submit">💾 Sauvegarder</button>
+                    </td>
+                </form>
             </tr>
             {% endfor %}
         </tbody>
