@@ -6,7 +6,6 @@ from sqlalchemy import create_engine, text
 from dotenv import load_dotenv
 from urllib.parse import quote_plus
 import psycopg2
-from flask import Flask, jsonify, request, render_template, redirect, url_for, session
 from flask_cors import CORS
 import os
 import csv
@@ -153,11 +152,9 @@ def set_avatar():
 
 @app.route('/admin')
 def admin():
-    if not session.get("logged_in"):
-        return redirect(url_for("login"))
-    with engine.connect() as conn:
-        joueurs = conn.execute(text("SELECT pseudo, argent, avatar FROM players")).fetchall()
-    return render_template("admin.html", joueurs=joueurs)
+    if not session.get('admin'):
+        return redirect(url_for('login'))
+    return render_template('admin.html')
 
 @app.route('/admin/ajouter_argent', methods=["POST"])
 def admin_ajouter_argent():
@@ -205,17 +202,14 @@ def update_argent():
     
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    error = None
     if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        # ⚠️ Change ceci : c’est le compte admin codé en dur pour l’exemple
-        if username == 'admin' and password == 'monmotdepasse':
-            session['user'] = 'admin'
-            return redirect(url_for('home'))
+        password = request.form.get('password')
+        if password == "ton_mot_de_passe_secret":
+            session['admin'] = True
+            return redirect(url_for('admin'))
         else:
-            error = 'Identifiants invalides'
-    return render_template('login.html', error=error)
+            return render_template('login.html', error="Mot de passe incorrect")
+    return render_template('login.html')
 
 
 @app.route('/logout')
@@ -253,3 +247,4 @@ def export_json():
 if __name__ == '__main__':
     init_db()
     app.run(host='0.0.0.0', port=10000)
+    app.run(debug=True)

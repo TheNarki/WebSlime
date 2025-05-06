@@ -2,274 +2,114 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Mon Beau Site</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <title>Accueil - Mon Site Perso</title>
     <style>
         body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(to right, #667eea, #764ba2);
-            color: white;
-            text-align: center;
+            font-family: 'Arial', sans-serif;
             margin: 0;
             padding: 0;
+            background-color: #fdd28d;
+            color: #333;
         }
-
-        nav {
-            margin-top: 20px;
+        header {
+            background-color: #fff3e6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-
+        .logo {
+            font-weight: bold;
+            font-size: 1.5rem;
+            color: #f17300;
+        }
         nav a {
-            margin: 10px;
+            margin: 0 1rem;
             text-decoration: none;
-            color: white;
+            color: #333;
             font-weight: bold;
-            font-size: 20px;
         }
-
-        section {
-            margin-top: 50px;
+        nav a:hover {
+            color: #f17300;
         }
-
-        .player-card {
-            background-color: #2c3e50;
+        .hero {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #fdd28d;
+            padding: 3rem 2rem;
+        }
+        .hero-text {
+            max-width: 50%;
+        }
+        .hero-text h1 {
+            font-size: 3rem;
+            color: #222;
+        }
+        .hero-text p {
+            font-size: 1.2rem;
+            margin-top: 1rem;
+        }
+        .hero-image img {
+            max-width: 400px;
             border-radius: 10px;
-            padding: 20px;
-            margin: 10px;
-            display: inline-block;
-            width: 250px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
         }
-
-        .player-card:hover {
-            transform: scale(1.05);
-            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.5);
+        .section {
+            padding: 2rem;
+            background-color: #fff3e6;
         }
-
-        .player-card h3 {
-            margin: 0;
-            font-size: 24px;
+        .section h2 {
+            font-size: 2rem;
+            color: #f17300;
         }
-
-        .player-card p {
-            font-size: 18px;
-        }
-
-        .argent {
-            font-size: 22px;
-            color: #f39c12;
-        }
-
-        .argent i {
-            margin-right: 8px;
-        }
-
-        .content {
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .content.visible {
-            opacity: 1;
-        }
-
-        .loading {
-            font-size: 18px;
-            font-weight: bold;
-            color: #ecf0f1;
-        }
-
-        form {
-            margin-top: 20px;
-        }
-
-        input, button {
-            padding: 10px;
-            font-size: 16px;
-            margin: 5px;
+        .login-link {
+            color: #333;
+            border: 1px solid #f17300;
+            padding: 0.5rem 1rem;
             border-radius: 5px;
-            border: none;
+            text-decoration: none;
         }
-
-        button {
-            background-color: #f39c12;
+        .login-link:hover {
+            background-color: #f17300;
             color: white;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background-color: #e67e22;
-        }
-
-        .form-avatar {
-            margin-top: 20px;
-            padding: 10px;
-            background-color: #34495e;
-            border-radius: 8px;
-        }
-
-        .form-avatar input {
-            width: 300px;
-            margin-right: 10px;
         }
     </style>
 </head>
 <body>
+    <header>
+        <div class="logo">🧠 MON ESPACE</div>
+        <nav>
+            <a href="#accueil">Accueil</a>
+            <a href="#apropos">À propos de moi</a>
+            <a href="#boite">Boîte à idée</a>
+            <a class="login-link" href="/login">Connexion</a>
+        </nav>
+    </header>
 
-<nav>
-    <a href="#" onclick="changerPage('accueil')">Accueil</a>
-    <a href="#" onclick="changerPage('apropos')">À propos de moi</a>
-    <a href="#" onclick="changerPage('economie')">Économie</a>
-    <a href="#" onclick="demanderMotDePasse()">Admin</a>
-</nav>
+    <section class="hero" id="accueil">
+        <div class="hero-text">
+            <h1>Bienvenue dans mon univers</h1>
+            <p>Un espace interactif, créatif et fun pour échanger, découvrir et proposer.</p>
+        </div>
+        <div class="hero-image">
+            <img src="https://via.placeholder.com/400x300.png?text=Bienvenue" alt="Illustration d'accueil">
+        </div>
+    </section>
 
-<div class="content" id="content">
-    <h1>Bienvenue !</h1>
-    <p>Ce site est magnifique 🌟</p>
-</div>
+    <section class="section" id="apropos">
+        <h2>À propos de moi</h2>
+        <p>Je suis une personne passionnée par le développement, la créativité et l'interaction avec la communauté. Ce site est un reflet de mon envie de partager et d'innover.</p>
+    </section>
 
-<script>
-    function changerPage(page) {
-        const content = document.getElementById("content");
-        content.style.opacity = 0;
-
-        setTimeout(() => {
-            if (page === 'accueil') {
-                content.innerHTML = `
-                    <h1>Bienvenue !</h1>
-                    <p>Ce site est magnifique 🌟</p>
-                `;
-            } else if (page === 'apropos') {
-                content.innerHTML = `
-                    <h1>À propos de moi</h1>
-                    <p>Je suis passionné de code et de projets créatifs 🚀</p>
-                `;
-            } else if (page === 'economie') {
-                afficherEconomie();
-            }
-            content.style.opacity = 1;
-        }, 300);
-    }
-
-    function afficherEconomie() {
-        const content = document.getElementById("content");
-        content.innerHTML = `<h1>Économie du Serveur</h1><div id="liste-joueurs" class="loading">Chargement...</div>`;
-
-        fetch('/api/economie')
-            .then(response => response.json())
-            .then(data => {
-                const liste = document.getElementById('liste-joueurs');
-                liste.innerHTML = '';
-                data.forEach(joueur => {
-                    const card = document.createElement('div');
-                    card.classList.add('player-card');
-                    card.innerHTML = `
-                        <img src="https://cdn.discordapp.com/avatars/${joueur.id}/${joueur.avatar}.png" alt="Avatar" style="width: 64px; height: 64px; border-radius: 50%; margin-bottom: 10px;">
-                        <h3><i class="fas fa-user"></i> ${joueur.pseudo.toUpperCase()}</h3>
-                        <p class="argent"><i class="fas fa-coins"></i> ${joueur.argent} pièces 💰</p>
-                    `;
-                    liste.appendChild(card);
-                });
-            })
-            .catch(error => {
-                console.error('Erreur de chargement:', error);
-                document.getElementById('liste-joueurs').innerHTML = 'Impossible de charger les données. 😥';
-            });
-    }
-
-    function demanderMotDePasse() {
-        const motDePasse = prompt("Entrez le mot de passe admin :");
-        if (motDePasse === "a") {
-            afficherAdmin();
-        } else {
-            alert("⛔ Mot de passe incorrect !");
-        }
-    }
-
-    function afficherAdmin() {
-        const content = document.getElementById("content");
-        content.innerHTML = `
-            <h1>Panneau Admin</h1>
-            <p>Ajouter ou modifier l'économie d'un joueur 💼</p>
-            <form onsubmit="envoyerArgent(event)">
-                <input type="text" id="pseudo" placeholder="Pseudo du joueur" required>
-                <input type="number" id="montant" placeholder="Montant à ajouter" required>
-                <button type="submit">Envoyer</button>
-            </form>
-            <form onsubmit="supprimerJoueur(event)">
-                <input type="text" id="pseudo-supprimer" placeholder="Pseudo du joueur à supprimer" required>
-                <button type="submit">Supprimer le joueur</button>
-            </form>
-            <div id="resultat"></div>
-            <div class="form-avatar">
-                <h3>Changer l'avatar d'un joueur</h3>
-                <form onsubmit="changerAvatar(event)">
-                    <input type="text" id="pseudo-avatar" placeholder="Pseudo du joueur" required>
-                    <input type="text" id="avatar-url" placeholder="URL de l'avatar" required>
-                    <button type="submit">Mettre à jour l'avatar</button>
-                </form>
-            </div>
-        `;
-    }
-
-    function envoyerArgent(event) {
-        event.preventDefault();
-        const pseudo = document.getElementById('pseudo').value;
-        const montant = parseInt(document.getElementById('montant').value);
-
-        fetch('/api/ajouter_argent', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ pseudo, montant })
-        })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('resultat').innerText = `✅ ${data.message || "Opération réussie"}`;
-            })
-            .catch(error => {
-                console.error(error);
-                document.getElementById('resultat').innerText = '❌ Erreur lors de l\'envoi';
-            });
-    }
-
-    function supprimerJoueur(event) {
-        event.preventDefault();
-        const pseudo = document.getElementById('pseudo-supprimer').value;
-
-        fetch('/api/supprimer_joueur', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ pseudo })
-        })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('resultat').innerText = `✅ ${data.message || "Joueur supprimé avec succès"}`;
-            })
-            .catch(error => {
-                console.error(error);
-                document.getElementById('resultat').innerText = '❌ Erreur lors de la suppression';
-            });
-    }
-
-    function changerAvatar(event) {
-        event.preventDefault();
-        const pseudo = document.getElementById('pseudo-avatar').value;
-        const avatarUrl = document.getElementById('avatar-url').value;
-
-        fetch('/api/set_avatar', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ pseudo, avatar_url: avatarUrl })
-        })
-            .then(response => response.json())
-            .then(data => {
-                alert(data.message);
-            })
-            .catch(error => {
-                console.error(error);
-                alert('Erreur lors de la mise à jour de l\'avatar');
-            });
-    }
-</script>
-
+    <section class="section" id="boite">
+        <h2>Boîte à idée 💡</h2>
+        <p>Vous avez une idée, une suggestion, ou une envie ? C'est ici que ça se passe !</p>
+        <form>
+            <textarea placeholder="Partagez votre idée ici..." rows="5" style="width: 100%; padding: 1rem;"></textarea>
+            <button type="submit" style="margin-top: 1rem; background-color: #f17300; color: white; padding: 0.5rem 1.5rem; border: none; border-radius: 5px; cursor: pointer;">Envoyer</button>
+        </form>
+    </section>
 </body>
 </html>

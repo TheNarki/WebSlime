@@ -2,16 +2,16 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Gestion des Joueurs</title>
+    <title>Panneau d'administration</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 2rem;
-            background-color: #f2f2f2;
+            background-color: #fef6e4;
             color: #333;
         }
         h1 {
-            color: #007bff;
+            color: #d90429;
         }
         table {
             width: 100%;
@@ -22,48 +22,46 @@
         }
         th, td {
             padding: 0.75rem;
-            text-align: left;
             border-bottom: 1px solid #ddd;
         }
         th {
-            background-color: #007bff;
+            background-color: #f25f5c;
             color: white;
         }
         tr:hover {
             background-color: #f1f1f1;
         }
-        .export-buttons {
-            margin-bottom: 1rem;
+        .actions form {
+            display: inline;
         }
-        .export-buttons a {
-            display: inline-block;
-            margin-right: 1rem;
-            padding: 0.5rem 1rem;
-            background-color: #28a745;
+        input[type="number"], input[type="text"] {
+            padding: 0.25rem;
+            width: 80px;
+        }
+        button {
+            padding: 0.3rem 0.7rem;
+            background-color: #1982c4;
             color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            transition: background-color 0.3s ease;
+            border: none;
+            border-radius: 4px;
         }
-        .export-buttons a:hover {
-            background-color: #218838;
+        button.delete {
+            background-color: #d90429;
+        }
+        button.update {
+            background-color: #8ac926;
         }
     </style>
 </head>
 <body>
-    <h1>Liste des Joueurs</h1>
-    
-    <div class="export-buttons">
-        <a href="/export/argent/json">📥 Exporter en JSON</a>
-        <a href="/export/argent/csv">📄 Exporter en CSV</a>
-    </div>
+    <h1>Administration - Gestion des Joueurs</h1>
 
     <table>
         <thead>
             <tr>
                 <th>Pseudo</th>
                 <th>Argent</th>
-                <th>Avatar</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -71,16 +69,30 @@
             <tr>
                 <td>{{ joueur.pseudo }}</td>
                 <td>{{ joueur.argent }}</td>
-                <td>
-                    {% if joueur.avatar %}
-                        <img src="{{ joueur.avatar }}" alt="Avatar" width="40" height="40" style="border-radius: 50%;">
-                    {% else %}
-                        Aucun
-                    {% endif %}
+                <td class="actions">
+                    <!-- Formulaire de modification -->
+                    <form method="POST" action="/admin/update">
+                        <input type="hidden" name="pseudo" value="{{ joueur.pseudo }}">
+                        <input type="number" name="argent" value="{{ joueur.argent }}">
+                        <button class="update" type="submit">Modifier</button>
+                    </form>
+
+                    <!-- Formulaire de suppression -->
+                    <form method="POST" action="/admin/delete" onsubmit="return confirm('Supprimer ce joueur ?');">
+                        <input type="hidden" name="pseudo" value="{{ joueur.pseudo }}">
+                        <button class="delete" type="submit">Supprimer</button>
+                    </form>
                 </td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
+
+    <h2>Ajouter un joueur</h2>
+    <form method="POST" action="/admin/add">
+        <input type="text" name="pseudo" placeholder="Pseudo" required>
+        <input type="number" name="argent" placeholder="Argent" value="0" required>
+        <button type="submit">Ajouter</button>
+    </form>
 </body>
 </html>
