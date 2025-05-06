@@ -191,6 +191,13 @@ def admin_supprimer():
     return redirect(url_for("admin"))
 
 
+def get_db_connection():
+    try:
+        return psycopg2.connect(DATABASE_URL)
+    except Exception as e:
+        print(f"Erreur de connexion à la base de données : {e}")
+        raise
+
 @app.route('/admin/update', methods=['POST'])
 def update_argent():
     pseudo = request.form.get('pseudo')
