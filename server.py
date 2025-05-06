@@ -74,9 +74,14 @@ def economie():
 @app.route('/api/ajouter_joueur', methods=['POST'])
 def ajouter_joueur():
     data = request.get_json()
-    pseudo = data['pseudo']
+    pseudo = data['pseudo'].lower()
     try:
         with engine.connect() as conn:
+            # Vérifie si le pseudo existe déjà
+            result = conn.execute(text("SELECT 1 FROM players WHERE pseudo = :pseudo"), {"pseudo": pseudo}).fetchone()
+            if result:
+                return jsonify({"status": "error", "message": f"Le joueur '{pseudo}' existe déjà."}), 400
+
             conn.execute(text("INSERT INTO players (pseudo, argent) VALUES (:pseudo, 0)"), {"pseudo": pseudo})
             conn.commit()
         return jsonify({"status": "success", "message": f"Joueur {pseudo} ajouté avec succès!"})
