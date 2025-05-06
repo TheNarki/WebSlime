@@ -202,14 +202,17 @@ def update_argent():
     
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    error = None
     if request.method == 'POST':
-        password = request.form.get('password')
-        if password == "ton_mot_de_passe_secret":
-            session['admin'] = True
-            return redirect(url_for('admin'))
+        username = request.form['username']
+        password = request.form['password']
+        # ⚠️ Change ceci : c’est le compte admin codé en dur pour l’exemple
+        if username == 'admin' and password == 'monmotdepasse':
+            session['user'] = 'admin'
+            return redirect(url_for('home'))
         else:
-            return render_template('login.html', error="Mot de passe incorrect")
-    return render_template('login.html')
+            error = 'Identifiants invalides'
+    return render_template('login.html', error=error)
 
 
 @app.route('/logout')
