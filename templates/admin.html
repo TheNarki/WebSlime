@@ -32,32 +32,46 @@
         tr:hover {
             background-color: #f1f1f1;
         }
-        input[type="number"] {
-            width: 100px;
-            padding: 0.4rem;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+        .export-buttons {
+            margin-bottom: 1rem;
         }
-        button {
-            padding: 0.4rem 0.8rem;
+        .export-buttons a {
+            display: inline-block;
+            margin-right: 1rem;
+            padding: 0.5rem 1rem;
+            background-color: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        .export-buttons a:hover {
+            background-color: #218838;
+        }
+        .btn-save {
             background-color: #007bff;
             color: white;
             border: none;
+            padding: 5px 10px;
             border-radius: 4px;
             cursor: pointer;
         }
-        button:hover {
+        .btn-save:hover {
             background-color: #0056b3;
         }
-        img {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
+        input[type="text"], input[type="number"] {
+            width: 90%;
+            padding: 4px;
         }
     </style>
 </head>
 <body>
     <h1>Liste des Joueurs</h1>
+
+    <div class="export-buttons">
+        <a href="/export/argent/json">📥 Exporter en JSON</a>
+        <a href="/export/argent/csv">📄 Exporter en CSV</a>
+    </div>
 
     <table>
         <thead>
@@ -65,29 +79,25 @@
                 <th>Pseudo</th>
                 <th>Argent</th>
                 <th>Avatar</th>
-                <th>Action</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
             {% for joueur in joueurs %}
             <tr>
-                <form action="/admin/update" method="POST">
+                <form action="/admin/update" method="post">
                     <td>
                         <input type="hidden" name="pseudo" value="{{ joueur.pseudo }}">
                         {{ joueur.pseudo }}
                     </td>
                     <td>
-                        <input type="number" name="argent" value="{{ joueur.argent }}" required>
+                        <input type="number" name="argent" value="{{ joueur.argent }}">
                     </td>
                     <td>
-                        {% if joueur.avatar %}
-                            <img src="{{ joueur.avatar }}" alt="Avatar">
-                        {% else %}
-                            Aucun
-                        {% endif %}
+                        <input type="text" name="avatar_url" value="{{ joueur.avatar or '' }}">
                     </td>
                     <td>
-                        <button type="submit">💾 Sauvegarder</button>
+                        <button class="btn-save" type="submit">💾 Sauvegarder</button>
                     </td>
                 </form>
             </tr>

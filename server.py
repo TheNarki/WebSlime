@@ -202,15 +202,15 @@ def get_db_connection():
 def update_argent():
     pseudo = request.form.get('pseudo')
     nouvel_argent = request.form.get('argent')
+    avatar_url = request.form.get('avatar_url')
     try:
-        conn = get_db_connection()
-        with conn.cursor() as cursor:
-            cursor.execute("UPDATE players SET argent = %s WHERE pseudo = %s", (nouvel_argent, pseudo))
+        with engine.connect() as conn:
+            conn.execute(text("UPDATE players SET argent = :argent, avatar = :avatar WHERE pseudo = :pseudo"),
+                         {"argent": nouvel_argent, "avatar": avatar_url, "pseudo": pseudo})
             conn.commit()
-        conn.close()
     except Exception as e:
         print(f"Erreur lors de la mise à jour : {e}")
-    return redirect(url_for('admin'))  # Assure-toi que ta route admin s'appelle bien 'admin'
+    return redirect(url_for('admin'))
 
     
 @app.route('/login', methods=['GET', 'POST'])
@@ -235,17 +235,11 @@ def logout():
 def export_argent():
     with engine.connect() as conn:
         result = conn.execute(text("SELECT pseudo, argent FROM players"))
-        joueurs = result.fetchall()
+        joueurs = [dict(row._mapping) for row in result]
+    return jsonify(joueurs)
 
-@app.route('/api/export_json')
-def export_json():
-    with engine.connect() as conn:
-        result = conn.execute(text("SELECT pseudo, argent, avatar FROM players"))
-        players = [dict(row._mapping) for row in result]
-        return jsonify(players)
-    
 @app.route('/export/argent/json')
-def export_json():
+def export_argent_json():
     with engine.connect() as conn:
         result = conn.execute(text("SELECT pseudo, argent, avatar FROM players"))
         joueurs = [dict(row._mapping) for row in result]
@@ -271,5 +265,5 @@ def export_csv():
 
 if __name__ == '__main__':
     init_db()
-    app.run(host='0.0.0.0', port=10000)
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=10000, debug=True)
+

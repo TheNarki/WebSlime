@@ -5,36 +5,20 @@
     <title>Économie des Joueurs</title>
     <style>
         body {
-            font-family: 'Segoe UI', sans-serif;
-            background-color: #f7f9fb;
+            font-family: Arial, sans-serif;
+            margin: 2rem;
+            background-color: #f4f4f4;
             color: #333;
-            padding: 2rem;
         }
         h1 {
-            color: #4fd1c5;
-        }
-        .actions {
-            margin-bottom: 1rem;
-        }
-        input[type="text"] {
-            padding: 0.5rem;
-            width: 300px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        .export-json {
-            margin-left: 1rem;
-            padding: 0.5rem 1rem;
-            background-color: #4fd1c5;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
+            color: #2c3e50;
         }
         table {
             width: 100%;
-            background: white;
             border-collapse: collapse;
-            box-shadow: 0 0 8px rgba(0,0,0,0.1);
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            margin-top: 1rem;
         }
         th, td {
             padding: 0.75rem;
@@ -42,56 +26,36 @@
             border-bottom: 1px solid #ddd;
         }
         th {
-            background: #4fd1c5;
+            background-color: #2980b9;
             color: white;
-            cursor: pointer;
         }
         tr:hover {
-            background: #f1f1f1;
+            background-color: #f1f1f1;
         }
-        img {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
+        .back-button {
+            display: inline-block;
+            margin-bottom: 1rem;
+            padding: 0.5rem 1rem;
+            background-color: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        .back-button:hover {
+            background-color: #217dbb;
         }
     </style>
-    <script>
-        function filtrer() {
-            const filtre = document.getElementById("filtre").value.toLowerCase();
-            const lignes = document.querySelectorAll("tbody tr");
-            lignes.forEach(tr => {
-                const pseudo = tr.querySelector("td").textContent.toLowerCase();
-                tr.style.display = pseudo.includes(filtre) ? "" : "none";
-            });
-        }
-
-        function sortTable(colIndex) {
-            const table = document.querySelector("table tbody");
-            const rows = Array.from(table.rows);
-            const isNumeric = colIndex === 1;
-
-            rows.sort((a, b) => {
-                const valA = a.cells[colIndex].textContent.trim();
-                const valB = b.cells[colIndex].textContent.trim();
-                return isNumeric ? parseFloat(valB) - parseFloat(valA) : valA.localeCompare(valB);
-            });
-
-            table.innerHTML = "";
-            rows.forEach(row => table.appendChild(row));
-        }
-    </script>
 </head>
 <body>
-    <h1>💰 Économie des Joueurs</h1>
-    <div class="actions">
-        <input type="text" id="filtre" onkeyup="filtrer()" placeholder="🔎 Rechercher un pseudo...">
-        <a href="/export/argent/json" class="export-json">📥 Exporter en JSON</a>
-    </div>
+    <a href="/" class="back-button">🏠 Retour à l'accueil</a>
+
+    <h1>Classement des Joueurs par Argent</h1>
     <table>
         <thead>
             <tr>
-                <th onclick="sortTable(0)">Pseudo 🔽</th>
-                <th onclick="sortTable(1)">Argent 💰</th>
+                <th>Pseudo</th>
+                <th>Argent</th>
                 <th>Avatar</th>
             </tr>
         </thead>
@@ -102,7 +66,7 @@
                 <td>{{ joueur.argent }}</td>
                 <td>
                     {% if joueur.avatar %}
-                        <img src="{{ joueur.avatar }}" alt="avatar">
+                        <img src="{{ joueur.avatar }}" alt="Avatar" width="40" height="40">
                     {% else %}
                         Aucun
                     {% endif %}
