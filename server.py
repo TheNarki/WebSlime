@@ -37,7 +37,8 @@ except Exception as e:
     print(f"Erreur de connexion : {e}")
 
 app = Flask(__name__)
-app.secret_key = os.getenv("FLASK_SECRET_KEY", "votre_clé_ultra_secrète")
+app.secret_key = "choisis_une_clé_secrète"
+
 CORS(app)
 
 # Ajoute ce pour utiliser les sessions
@@ -202,17 +203,14 @@ def update_argent():
     
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    error = None
     if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        # ⚠️ Change ceci : c’est le compte admin codé en dur pour l’exemple
-        if username == 'admin' and password == 'monmotdepasse':
-            session['user'] = 'admin'
-            return redirect(url_for('home'))
+        password = request.form.get('password')
+        if password == "ton_mot_de_passe_secret":
+            session['admin'] = True
+            return redirect(url_for('admin'))
         else:
-            error = 'Identifiants invalides'
-    return render_template('login.html', error=error)
+            return render_template('login.html', error="Mot de passe incorrect")
+    return render_template('login.html')
 
 
 @app.route('/logout')

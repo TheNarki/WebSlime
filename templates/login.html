@@ -2,51 +2,50 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Connexion Admin</title>
+    <title>Connexion</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f2f2f2;
-            padding: 2rem;
+            background-color: #ffe3b3;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
         }
         form {
             background-color: white;
             padding: 2rem;
-            max-width: 300px;
-            margin: auto;
+            border-radius: 10px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
-        input[type="text"], input[type="password"] {
+        input {
+            padding: 0.5rem;
+            margin-top: 1rem;
             width: 100%;
-            padding: 0.75rem;
-            margin-bottom: 1rem;
         }
         button {
-            width: 100%;
-            padding: 0.75rem;
+            margin-top: 1rem;
+            padding: 0.5rem;
             background-color: #007bff;
             color: white;
             border: none;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #0056b3;
+            width: 100%;
+            border-radius: 5px;
         }
         .error {
             color: red;
-            margin-bottom: 1rem;
+            margin-top: 1rem;
         }
     </style>
 </head>
 <body>
     <form method="POST">
-        <h2>Connexion Admin</h2>
+        <h2>Connexion admin</h2>
+        <input type="password" name="password" placeholder="Mot de passe admin" required>
+        <button type="submit">Se connecter</button>
         {% if error %}
         <div class="error">{{ error }}</div>
         {% endif %}
-        <input type="text" name="username" placeholder="Nom d'utilisateur" required>
-        <input type="password" name="password" placeholder="Mot de passe" required>
-        <button type="submit">Se connecter</button>
     </form>
 </body>
 </html>
