@@ -3,163 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <title>Économie des Joueurs</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
         body {
             font-family: 'Segoe UI', sans-serif;
-            background-color: #1e1e2f;
-            color: #f5f5f5;
-            margin: 0;
-            padding: 0;
-        }
-
-        header {
-            background-color: #2e2e3f;
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        header h1 {
-            color: #4fd1c5;
-            margin: 0;
-        }
-
-        nav a {
-            color: #f5f5f5;
-            margin-left: 1rem;
-            text-decoration: none;
-        }
-
-        .container {
-            max-width: 1000px;
-            margin: 2rem auto;
-            background-color: #2a2a3d;
+            background-color: #f7f9fb;
+            color: #333;
             padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.4);
         }
-
-        .filters {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 1rem;
+        h1 {
+            color: #4fd1c5;
         }
-
-        .filters input {
+        input[type="text"] {
             padding: 0.5rem;
-            border-radius: 4px;
-            border: none;
-            width: 60%;
+            width: 300px;
+            margin-bottom: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 5px;
         }
-
-        .filters button {
-            padding: 0.5rem 1rem;
-            border: none;
-            background-color: #4fd1c5;
-            color: #1e1e2f;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
         table {
             width: 100%;
+            background: white;
             border-collapse: collapse;
-            margin-top: 1rem;
+            box-shadow: 0 0 8px rgba(0,0,0,0.1);
         }
-
         th, td {
-            padding: 1rem;
+            padding: 0.75rem;
             text-align: left;
-            border-bottom: 1px solid #444;
+            border-bottom: 1px solid #ddd;
         }
-
         th {
-            background-color: #4fd1c5;
-            color: #1e1e2f;
+            background: #4fd1c5;
+            color: white;
         }
-
         tr:hover {
-            background-color: #3b3b50;
+            background: #f1f1f1;
         }
-
-        img.avatar {
+        img {
             width: 40px;
             height: 40px;
             border-radius: 50%;
         }
     </style>
-</head>
-<body>
-    <header>
-        <h1>Économie des Joueurs</h1>
-        <nav>
-            <a href="/">Accueil</a>
-            <a href="/a-propos">À propos</a>
-            <a href="/boite-idee">Boîte à idées</a>
-            <a href="/login">Connexion</a>
-        </nav>
-    </header>
-
-    <div class="container">
-        <div class="filters">
-            <input type="text" id="searchInput" placeholder="Rechercher un pseudo..." onkeyup="filterTable()">
-            <button onclick="sortTable()">Trier par argent</button>
-        </div>
-
-        <table id="joueursTable">
-            <thead>
-                <tr>
-                    <th>Pseudo</th>
-                    <th>Argent</th>
-                    <th>Avatar</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for joueur in joueurs %}
-                <tr>
-                    <td>{{ joueur.pseudo }}</td>
-                    <td>{{ joueur.argent }}</td>
-                    <td>
-                        {% if joueur.avatar %}
-                            <img class="avatar" src="{{ joueur.avatar }}" alt="Avatar">
-                        {% else %}
-                            Aucun
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-
     <script>
-        function filterTable() {
-            const input = document.getElementById("searchInput").value.toLowerCase();
-            const rows = document.querySelectorAll("#joueursTable tbody tr");
-
-            rows.forEach(row => {
-                const pseudo = row.cells[0].textContent.toLowerCase();
-                row.style.display = pseudo.includes(input) ? "" : "none";
+        function filtrer() {
+            const filtre = document.getElementById("filtre").value.toLowerCase();
+            const lignes = document.querySelectorAll("tbody tr");
+            lignes.forEach(tr => {
+                const pseudo = tr.querySelector("td").textContent.toLowerCase();
+                tr.style.display = pseudo.includes(filtre) ? "" : "none";
             });
-        }
-
-        let ascending = true;
-        function sortTable() {
-            const table = document.getElementById("joueursTable");
-            const rows = Array.from(table.rows).slice(1);
-            const sorted = rows.sort((a, b) => {
-                const aValue = parseInt(a.cells[1].textContent);
-                const bValue = parseInt(b.cells[1].textContent);
-                return ascending ? aValue - bValue : bValue - aValue;
-            });
-
-            ascending = !ascending;
-            const tbody = table.querySelector("tbody");
-            tbody.innerHTML = "";
-            sorted.forEach(row => tbody.appendChild(row));
         }
     </script>
+</head>
+<body>
+    <h1>💰 Économie des Joueurs</h1>
+    <input type="text" id="filtre" onkeyup="filtrer()" placeholder="🔎 Rechercher un pseudo...">
+    <table>
+        <thead>
+            <tr>
+                <th>Pseudo</th>
+                <th>Argent</th>
+                <th>Avatar</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for joueur in joueurs %}
+            <tr>
+                <td>{{ joueur.pseudo }}</td>
+                <td>{{ joueur.argent }}</td>
+                <td>
+                    {% if joueur.avatar %}
+                        <img src="{{ joueur.avatar }}" alt="avatar">
+                    {% else %}
+                        Aucun
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </body>
 </html>

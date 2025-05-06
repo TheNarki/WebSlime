@@ -71,6 +71,13 @@ def economie():
         result = conn.execute(text("SELECT pseudo, argent, avatar FROM players"))
         players = [dict(row._mapping) for row in result]
         return jsonify(players)
+    
+@app.route('/economie')
+def economie_vue():
+    with engine.connect() as conn:
+        result = conn.execute(text("SELECT pseudo, argent, avatar FROM players ORDER BY argent DESC"))
+        joueurs = [dict(row._mapping) for row in result]
+    return render_template('economie.html', joueurs=joueurs)
 
 @app.route('/api/ajouter_joueur', methods=['POST'])
 def ajouter_joueur():
